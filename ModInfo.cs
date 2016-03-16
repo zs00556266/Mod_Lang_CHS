@@ -19,20 +19,21 @@ namespace Mod_Lang_CHS
         {
             get
             {
+                try
+                {
+                    ModMain.setup();
+                }
+                catch (Exception e)
+                {
+                    DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, e.ToString());
+                }
                 return "简体中文";
             }
         }
 
         public void OnEnabled()
         {
-            try
-            {
-                ModMain.setup();
-            }
-            catch (Exception e)
-            {
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, e.ToString());
-            }
+            
         }
 
         public void OnDisabled()
