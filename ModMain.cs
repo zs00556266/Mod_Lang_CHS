@@ -10,7 +10,9 @@ namespace Mod_Lang_CHS
 
         private static string locale_name = "zh-cn";
 
-        private static bool first_install = true;
+        private static string locale_md5 = "9F22493DB8A50D2444C08C3DC0BF193B";
+
+        private static bool installed = false;
 
         public enum Platform
         {
@@ -50,7 +52,6 @@ namespace Mod_Lang_CHS
 
         private static string getLocalePath()
         {
-
             switch (getPlatform())
             {
                 case Platform.Windows:
@@ -73,12 +74,20 @@ namespace Mod_Lang_CHS
             
             string dst_path = getLocalePath();
 
-            first_install = File.Exists(dst_path);
+            installed = File.Exists(dst_path);
 
-            File.Delete(dst_path);
+            if (installed && checkMD5(dst_path))
+            {
+#if (DEBUG)
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "first install:false, md5 equals:true");
+#endif
+                return;
+            }
+
+            //File.Delete(dst_path);
             FileStream dst = File.OpenWrite(dst_path);
 
-            byte[] buffer = new byte[8 * 1024];
+            byte[] buffer = new byte[300 * 1024];
             int len = 0;
             while ((len = st.Read(buffer, 0, buffer.Length)) > 0)
             {
@@ -87,36 +96,93 @@ namespace Mod_Lang_CHS
             dst.Close();
             st.Close();
 
+            installed = File.Exists(dst_path);
+
+        }
+
+        private static bool checkMD5(String filepath)
+        {
+            string md5 = getMD5Hash(filepath);
+#if (DEBUG)
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, String.Format("use loacle: {0}, mod loacle: {1}, equal:{2}", md5, locale_md5, locale_md5.Equals(md5)));
+#endif
+            return md5 == null ? true : locale_md5.Equals(md5);
         }
 
         private static void setupLocale()
         {
             ColossalFramework.Globalization.LocaleManager.ForceReload();
+
+            if (installed)
+            {
+                int localeIndex = ColossalFramework.Globalization.LocaleManager.instance.GetLocaleIndex(locale_name);
+                ColossalFramework.Globalization.LocaleManager.instance.LoadLocaleByIndex(localeIndex);
+                ColossalFramework.SavedString lang_setting = new ColossalFramework.SavedString("localeID", "gameSettings");
+                lang_setting.value = locale_name;
+                ColossalFramework.GameSettings.SaveAll();
+            }
+
+            /*
             if (first_install)
             {
                 string[] locales = ColossalFramework.Globalization.LocaleManager.instance.supportedLocaleIDs;
                 for (int i = 0; i < locales.Length; i++)
                 {
-#if (DEBUG)
-                    DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, String.Format("Locale index: {0}, ID: {1}", i, locales[i]));
-#endif
                     if (locales[i].Equals(locale_name))
                     {
-#if (DEBUG)
-                        DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, String.Format("Find locale {0} at index: {1}", locale_name, i));
-#endif
                         ColossalFramework.Globalization.LocaleManager.instance.LoadLocaleByIndex(i);
+                        ColossalFramework.Globalization.LocaleManager.instance.
 
                         ColossalFramework.SavedString lang_setting = new ColossalFramework.SavedString("localeID", "gameSettings");
-#if (DEBUG)
-                        DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, String.Format("Current Language Setting: {0}", lang_setting.value));
-#endif
+
                         lang_setting.value = locale_name;
                         ColossalFramework.GameSettings.SaveAll();
                         break;
                     }
                 }
             }
+            */
+        }
+
+
+        private static string getMD5Hash(string pathName)
+        {
+
+            string strResult = "";
+
+            string strHashData = "";
+
+            byte[] arrbytHashValue;
+
+            System.IO.FileStream oFileStream = null;
+
+            System.Security.Cryptography.MD5CryptoServiceProvider oMD5Hasher = new System.Security.Cryptography.MD5CryptoServiceProvider();
+
+            try
+            {
+
+                oFileStream = new System.IO.FileStream(pathName, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
+
+                arrbytHashValue = oMD5Hasher.ComputeHash(oFileStream);
+
+                oFileStream.Close();
+
+                strHashData = System.BitConverter.ToString(arrbytHashValue);
+
+                strHashData = strHashData.Replace("-", "");
+
+                strResult = strHashData;
+
+            }
+            catch (System.Exception ex)
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, String.Format("getMD5Hash Error : {0}", ex.Message));
+                return null;
+
+            }
+
+            return strResult;
+
         }
     }
 }

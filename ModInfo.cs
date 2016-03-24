@@ -6,6 +6,8 @@ namespace Mod_Lang_CHS
 {
     public class ModInfo : IUserMod
     {
+        private static string version = "3(1.4.0-f3)";
+
         public string Description
         {
             get
@@ -19,21 +21,24 @@ namespace Mod_Lang_CHS
         {
             get
             {
-                try
-                {
-                    ModMain.setup();
-                }
-                catch (Exception e)
-                {
-                    DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, e.ToString());
-                }
-                return "简体中文";
+                return "简体中文ver." + version;
             }
         }
 
         public void OnEnabled()
         {
-            
+#if (DEBUG)
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "Mod Lang CHS OnEnabled");
+#endif
+
+            try
+            {
+                ModMain.setup();
+            }
+            catch (Exception e)
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, e.ToString());
+            }
         }
 
         public void OnDisabled()
