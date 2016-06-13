@@ -10,7 +10,7 @@ namespace Mod_Lang_CHS
 
         private static string locale_name = "zh-cn";
 
-        private static string locale_md5 = "AC65F14F153579903BA55A4A7FA199CA";
+        private static string locale_md5 = "8AB75B7B345353C90A5C580F81925133";
 
         private static bool installed = false;
 

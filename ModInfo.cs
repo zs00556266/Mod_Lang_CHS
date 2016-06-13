@@ -6,7 +6,7 @@ namespace Mod_Lang_CHS
 {
     public class ModInfo : IUserMod
     {
-        private static string version = "3.1(1.4.1-f2)";
+        private static string version = "3.2(1.5.0-f4)";
 
         public string Description
         {
